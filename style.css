@@ -48,6 +48,10 @@
     color: rgb(255, 255, 255);
 }
 
+.red {
+    color: #770b0c;
+}
+
 .pStatsBarItemText {
     margin-top: 8px;
     font-size: 14px;
