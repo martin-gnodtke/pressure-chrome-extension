@@ -6,9 +6,8 @@
   "content_scripts": [
     {
       "matches": ["https://opensea.io/collection/*"],
-      "js": ["app.js"],
       "css": ["style.css"],
-      "run_at": "document_end"
+      "run_at": "document_start"
     }
   ],
   "action": {
@@ -25,8 +24,11 @@
     "128": "logo_128x128.png"
   },
   "host_permissions": [
-    "http://*/",
-    "http://localhost/*/"
+    "<all_urls>"
   ],
-  "permissions": ["webRequest", "storage", "cookies"]
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["webRequest", "storage", "cookies", "tabs", "scripting"]
 }

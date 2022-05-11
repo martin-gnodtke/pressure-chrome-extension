@@ -1,8 +1,10 @@
 .pressureStatsBar {
+    overflow: hidden;
     display: flex;
     flex-direction: row;
     align-items: center;
     border-radius: 10px;
+    position: relative;
     border: 1px solid rgb(21, 27, 34);
 }
 
@@ -37,6 +39,7 @@
     font-size: 12px;
     font-weight: 500;
     height: 20px;
+
     -webkit-box-pack: center;
     justify-content: center;
     width: 100%;
@@ -77,6 +80,10 @@
     outline: none;
 }
 
+.pDropdown select:disabled {
+    display: none;
+}
+
 .pTimer {
     width: 144px;
     padding: 6px;
@@ -97,3 +104,42 @@
     width: 13px;
     margin-right: 9px;
 }
+
+.pLogIn {
+    display: block;
+    width: 436px;
+    height: 108px;
+    /*position: absolute;*/
+    /*z-index: 1;*/
+    /*top:0;*/
+    /*left: 0;*/
+    border-radius: 10px;
+    border: 1px solid rgb(21, 27, 34);
+    /*opacity: 1;*/
+}
+
+.pLogInDisable {
+    display: none;
+}
+
+.pStatBarDisable{
+    display: none;
+}
+
+.pLogInButton {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+
+    border:none;
+    outline: none;
+    cursor: pointer;
+
+    color: rgb(255, 255, 255);
+}
+
+.pLogInText {
+    text-transform: uppercase;
+    font-size: 20px;
+}
+
