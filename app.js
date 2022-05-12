@@ -151,7 +151,6 @@ function render() {
 
         document.querySelector(".pDropdown").addEventListener("change", function() {
             if(firstTime) {
-                startTimer(30, display);
                 updateData(display);
                 firstTime = false;
             }
@@ -178,7 +177,7 @@ function render() {
         })
     }
 
-    async function updateData(display,interval) {
+    async function updateData(display) {
         let pDropdown = document.querySelector(".pDropdown");
 
         if (!!pDropdown) {
@@ -186,30 +185,36 @@ function render() {
             let queryTime = new Date();
             queryTime.setMinutes(queryTime.getMinutes() - parseInt(selectedTime.value));
             let collection = new URL(window.location.href);
+
+            //replace
             let col_slug = collection.pathname.replace('/collection/', '');
 
-            let sales = await fetchSales(col_slug, selectedTime.value);
-            let listings = await fetchListings(col_slug, selectedTime.value);
+            Promise.all([
+                fetchSales(col_slug, selectedTime.value),
+                fetchListings(col_slug, selectedTime.value)
+            ]).then(([sales,listings]) => {
+                let pressure = (sales-listings);
 
-            let pressure = (sales-listings);
-
-            if (sales === undefined || listings === undefined) {
-                clearInterval(interval)
-                document.querySelector(".pressureStatsBar").remove();
-                document.querySelector(".pTimer").innerHTML = markupTimer;
-                document.querySelector(".pDropdownSelect").innerHTML = markupSelect;
-                renderButtonLogIn();
-            } else {
                 let pTimerIcon = document.querySelector('.pTimerIcon');
                 if (!!pTimerIcon) {
                     pTimerIcon.style.display = "none";
                 }
                 display.innerText = "refresh..";
-            }
-            document.querySelector('.salesValue').firstChild.innerHTML = sales;
-            document.querySelector('.listedValue').firstChild.innerHTML = listings;
-            document.querySelector('.pressureValue').firstChild.style.color = ((pressure < 0) ? '#770b0c' : '#1c9d00');
-            document.querySelector('.pressureValue').firstChild.innerHTML = pressure;
+
+                if (sales === undefined || listings === undefined) {
+                    document.querySelector(".pressureStatsBar").remove();
+                    document.querySelector(".pTimer").innerHTML = markupTimer;
+                    document.querySelector(".pDropdownSelect").innerHTML = markupSelect;
+                    renderButtonLogIn();
+                } else {
+                    startTimer(30, display)
+                }
+                document.querySelector('.salesValue').firstChild.innerHTML = sales;
+                document.querySelector('.listedValue').firstChild.innerHTML = listings;
+                document.querySelector('.pressureValue').firstChild.style.color = ((pressure < 0) ? '#770b0c' : '#1c9d00');
+                document.querySelector('.pressureValue').firstChild.innerHTML = pressure;
+            })
+
         }
     }
 
@@ -217,19 +222,22 @@ function render() {
         let timer = duration;
 
         const interval = setInterval(async function () {
-            display.innerText = timer.toString()+"s";
-            let minusTimer = --timer
-
+            let minusTimer = --timer;
             if (minusTimer < 0) {
                 await updateData(display,interval);
+
+                let pTimerIcon = document.querySelector('.pTimerIcon');
+                if (!!pTimerIcon) {
+                    pTimerIcon.style.display = "none";
+                }
+                display.innerText = "refresh..";
                 timer = duration;
+                clearInterval(interval)
             } else {
                 const pTimerIcon = document.querySelector('.pTimerIcon');
+                display.innerText = timer.toString()+"s";
                 if (!!pTimerIcon) pTimerIcon.style.display = "flex";
             }
         }, 1000);
     }
-
-
-
 }
