@@ -1,29 +1,77 @@
 try {
     const interval = setInterval(() => {
         let collectionStatsBar = document.getElementsByClassName('Blockreact__Block-sc-1xf18x6-0 hfScwI')[1];
+        let dropdown = document.getElementsByClassName("pDropdown");
+        let statBar = document.querySelector(".pressureStatsBar");
+        let timer = document.querySelector(".pTimer");
+
+        if (!!statBar || !!timer || !!dropdown.length) {
+            clearInterval(interval);
+            statBar.remove();
+            timer.remove();
+            removeDuplicates(dropdown);
+        }
 
         if (!!collectionStatsBar) {
+            let collection = new URL(window.location.href);
+            let col_slug1 = collection.pathname.replace('/collection/', '');
+            let collectionName = col_slug1.replace("/activity","")
+
+            async function fetchAddress(col_slug) {
+                const response = await fetch(`http://localhost:5000/api/collection/${col_slug}/check-address`, {
+                    "method": "GET",
+                    "headers": {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    "mode": "cors",
+                    "credentials": "include",
+                    "withCredentials": "true"
+                }).catch(error => console.log(error));
+                return await response.json();
+            }
+
             clearInterval(interval);
-            render();
+            fetchAddress(collectionName).then((data) => {
+                render(data.status);
+            });
         }
     },10)
 } catch (e) {
 
 }
 
-function render() {
+function removeDuplicates(htmlCollection) {
+   Array.from(htmlCollection).forEach((domElement) => domElement.parentNode.removeChild(domElement));
+}
+
+function render(status) {
     let collectionStatsBar = document.getElementsByClassName('Blockreact__Block-sc-1xf18x6-0 hfScwI')[1];
+    let chainData = document.getElementsByClassName("Blockreact__Block-sc-1xf18x6-0 Flexreact__Flex-sc-1twd32i-0 FlexColumnreact__FlexColumn-sc-1wwz3hp-0 VerticalAlignedreact__VerticalAligned-sc-b4hiel-0 CenterAlignedreact__CenterAligned-sc-cjf6mn-0 Avatarreact__AvatarContainer-sc-sbw25j-0 edMTda jYqxGr ksFzlZ iXcsEj cgnEmv dukFGY")[0].parentNode;
+    const chainLabel = chainData.getAttribute("aria-label");
+
 
     fetchAccount().then((data) => {
-        if (data.id) {
-            renderStatusBar()
+        if(status !== 200 && chainLabel.includes("ETH")) {
+            renderSolanaMessage("Polygon");
+        } else if (chainLabel.includes("KLAY")) {
+            renderSolanaMessage("KLAY");
+        } else if (chainLabel.includes("SOL")) {
+            renderSolanaMessage("Solana");
+        } else if (data.id) {
+            renderStatusBar();
+        } else {
+            renderButtonLogIn();
+        }
+    }).catch(() => {
+        if (chainLabel.includes("KLAY")) {
+            renderSolanaMessage("KLEY");
+        } else if (chainLabel.includes("SOL")) {
+            renderSolanaMessage("Solana");
         } else {
             renderButtonLogIn()
         }
-    }).catch(() => renderButtonLogIn())
-
-
-
+    })
 
     async function refreshToken() {
         await fetch("http://localhost:5000/api/user/refresh-access", {
@@ -38,8 +86,8 @@ function render() {
         }).catch((error) => console.error(error));
     }
 
-    async function fetchSales(col_slug, queryTime) {
-        const response = await fetch(`http://localhost:5000/api/collection/${col_slug}/sales/${queryTime}`, {
+    async function fetchInformation (col_slug, queryTime) {
+        const response = await fetch(`http://localhost:5000/api/collection/${col_slug}/information/${queryTime}`, {
             "method": "GET",
             "headers": {
                 "Accept": "application/json",
@@ -49,23 +97,7 @@ function render() {
             "credentials": "include",
             "withCredentials": "true"
         }).catch(error => console.log(error));
-        const sales = await response.json();
-        return sales.sales;
-    }
-
-    async function fetchListings(col_slug, queryTime) {
-        const response = await fetch(`http://localhost:5000/api/collection/${col_slug}/listings/${queryTime}`, {
-            "method": "GET",
-            "headers": {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            },
-            "mode": "cors",
-            "credentials": "include",
-            "withCredentials": "true"
-        }).catch(error => console.log(error));
-        const listings = await response.json();
-        return listings.listings;
+        return await response.json();
     }
 
     async function fetchAccount() {
@@ -158,6 +190,14 @@ function render() {
 
     }
 
+    function renderSolanaMessage(nameChain) {
+        let divSolanaMessage = document.createElement("div");
+        divSolanaMessage.className = "divSolanaMessage pLogIn";
+        divSolanaMessage.innerHTML = "<span class='pSolanaMessage'>" + `${nameChain} Collections are currently not supported` + "</span>";
+        collectionStatsBar.parentNode.insertBefore(divSolanaMessage, pTimer);
+        document.querySelector(".pDropdownSelect").setAttribute("disabled","true")
+    }
+
     function renderButtonLogIn() {
         let pLogInButton = document.createElement("div");
         pLogInButton.className = "pLogIn";
@@ -186,35 +226,39 @@ function render() {
             queryTime.setMinutes(queryTime.getMinutes() - parseInt(selectedTime.value));
             let collection = new URL(window.location.href);
 
-            //replace
-            let col_slug = collection.pathname.replace('/collection/', '');
+
+            let col_slug1 = collection.pathname.replace('/collection/', '');
+            let collectionName = col_slug1.replace("/activity","")
+
 
             Promise.all([
-                fetchSales(col_slug, selectedTime.value),
-                fetchListings(col_slug, selectedTime.value)
-            ]).then(([sales,listings]) => {
-                let pressure = (sales-listings);
+                fetchInformation(collectionName,selectedTime.value)
+            ]).then(([information]) => {
+                const {status, sales, listings} = information;
 
-                let pTimerIcon = document.querySelector('.pTimerIcon');
-                if (!!pTimerIcon) {
-                    pTimerIcon.style.display = "none";
-                }
-                display.innerText = "refresh..";
+                if (status === 200) {
+                    let pressure = (sales-listings);
 
-                if (sales === undefined || listings === undefined) {
-                    document.querySelector(".pressureStatsBar").remove();
-                    document.querySelector(".pTimer").innerHTML = markupTimer;
-                    document.querySelector(".pDropdownSelect").innerHTML = markupSelect;
-                    renderButtonLogIn();
-                } else {
-                    startTimer(30, display)
+                    let pTimerIcon = document.querySelector('.pTimerIcon');
+                    if (!!pTimerIcon) {
+                        pTimerIcon.style.display = "none";
+                    }
+                    display.innerText = "refresh..";
+
+                    if (sales === undefined || listings === undefined) {
+                        document.querySelector(".pressureStatsBar").remove();
+                        document.querySelector(".pTimer").innerHTML = markupTimer;
+                        document.querySelector(".pDropdownSelect").innerHTML = markupSelect;
+                        renderButtonLogIn();
+                    } else {
+                        startTimer(30, display)
+                    }
+                    document.querySelector('.salesValue').firstChild.innerHTML = sales;
+                    document.querySelector('.listedValue').firstChild.innerHTML = listings;
+                    document.querySelector('.pressureValue').firstChild.style.color = ((pressure < 0) ? '#770b0c' : '#1c9d00');
+                    document.querySelector('.pressureValue').firstChild.innerHTML = pressure;
                 }
-                document.querySelector('.salesValue').firstChild.innerHTML = sales;
-                document.querySelector('.listedValue').firstChild.innerHTML = listings;
-                document.querySelector('.pressureValue').firstChild.style.color = ((pressure < 0) ? '#770b0c' : '#1c9d00');
-                document.querySelector('.pressureValue').firstChild.innerHTML = pressure;
             })
-
         }
     }
 
