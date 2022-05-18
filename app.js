@@ -28,7 +28,8 @@ try {
                     "credentials": "include",
                     "withCredentials": "true"
                 }).catch(error => console.log(error));
-                return await response.json();
+                const result =  await response.json();
+                return result;
             }
 
             clearInterval(interval);
@@ -74,6 +75,7 @@ function render(status) {
     })
 
     async function refreshToken() {
+        let controller = new AbortController();
         await fetch("http://localhost:5000/api/user/refresh-access", {
             "method": "GET",
             "headers": {
@@ -82,11 +84,12 @@ function render(status) {
             },
             "mode": "cors",
             "credentials": "include",
-            "withCredentials": "true"
+            "withCredentials": "true",
+            signal: controller.signal
         }).catch((error) => console.error(error));
     }
 
-    async function fetchInformation (col_slug, queryTime) {
+    async function fetchInformation (col_slug, queryTime, signal) {
         const response = await fetch(`http://localhost:5000/api/collection/${col_slug}/information/${queryTime}`, {
             "method": "GET",
             "headers": {
@@ -95,12 +98,14 @@ function render(status) {
             },
             "mode": "cors",
             "credentials": "include",
-            "withCredentials": "true"
+            "withCredentials": "true",
+            signal: signal
         }).catch(error => console.log(error));
         return await response.json();
     }
 
     async function fetchAccount() {
+        let controller = new AbortController();
         const response = await fetch(`http://localhost:5000/api/user/account`, {
             "method": "GET",
             "headers": {
@@ -109,7 +114,8 @@ function render(status) {
             },
             "mode": "cors",
             "credentials": "include",
-            "withCredentials": "true"
+            "withCredentials": "true",
+            signal: controller.signal
         }).catch(error => console.log(error));
         return await response.json();
     }
@@ -146,6 +152,7 @@ function render(status) {
 
 
     function renderStatusBar() {
+        document.querySelector(".pDropdownSelect").removeAttribute("disabled")
         let pressureStatsBar = document.createElement('div');
         pressureStatsBar.className = "pressureStatsBar";
         pressureStatsBar.innerHTML =
@@ -207,6 +214,7 @@ function render(status) {
             "</span>" +
             "</button>";
 
+        document.querySelector(".pDropdownSelect").setAttribute("disabled","true")
         collectionStatsBar.parentNode.insertBefore(pLogInButton, pTimer);
 
         document.querySelector(".pLogIn").addEventListener("click",(event) => {
@@ -220,6 +228,9 @@ function render(status) {
     async function updateData(display) {
         let pDropdown = document.querySelector(".pDropdown");
 
+        const controller = new AbortController();
+        const signal = controller.signal;
+
         if (!!pDropdown) {
             let selectedTime = pDropdown.firstChild;
             let queryTime = new Date();
@@ -232,32 +243,31 @@ function render(status) {
 
 
             Promise.all([
-                fetchInformation(collectionName,selectedTime.value)
+                fetchInformation(collectionName,selectedTime.value,signal)
             ]).then(([information]) => {
-                const {status, sales, listings} = information;
+                const { sales, listings} = information;
 
-                if (status === 200) {
-                    let pressure = (sales-listings);
+                let pressure = (sales-listings);
 
-                    let pTimerIcon = document.querySelector('.pTimerIcon');
-                    if (!!pTimerIcon) {
-                        pTimerIcon.style.display = "none";
-                    }
-                    display.innerText = "refresh..";
-
-                    if (sales === undefined || listings === undefined) {
-                        document.querySelector(".pressureStatsBar").remove();
-                        document.querySelector(".pTimer").innerHTML = markupTimer;
-                        document.querySelector(".pDropdownSelect").innerHTML = markupSelect;
-                        renderButtonLogIn();
-                    } else {
-                        startTimer(30, display)
-                    }
-                    document.querySelector('.salesValue').firstChild.innerHTML = sales;
-                    document.querySelector('.listedValue').firstChild.innerHTML = listings;
-                    document.querySelector('.pressureValue').firstChild.style.color = ((pressure < 0) ? '#770b0c' : '#1c9d00');
-                    document.querySelector('.pressureValue').firstChild.innerHTML = pressure;
+                let pTimerIcon = document.querySelector('.pTimerIcon');
+                if (!!pTimerIcon) {
+                    pTimerIcon.style.display = "none";
                 }
+                display.innerText = "refresh..";
+
+                if (sales === undefined || listings === undefined) {
+                    document.querySelector(".pressureStatsBar").remove();
+                    document.querySelector(".pTimer").innerHTML = markupTimer;
+                    document.querySelector(".pDropdownSelect").innerHTML = markupSelect;
+                    renderButtonLogIn();
+                } else {
+
+                    startTimer(30, display)
+                }
+                document.querySelector('.salesValue').firstChild.innerHTML = sales;
+                document.querySelector('.listedValue').firstChild.innerHTML = listings;
+                document.querySelector('.pressureValue').firstChild.style.color = ((pressure < 0) ? '#770b0c' : '#1c9d00');
+                document.querySelector('.pressureValue').firstChild.innerHTML = pressure;
             })
         }
     }
@@ -267,6 +277,17 @@ function render(status) {
 
         const interval = setInterval(async function () {
             let minusTimer = --timer;
+
+            let lastURL = location.href;
+
+            new MutationObserver(() => {
+                const url = location.href;
+                if (url !== lastURL) {
+                    clearInterval(interval);
+                }
+            }).observe(document, {subtree:true, childList:true});
+
+
             if (minusTimer < 0) {
                 await updateData(display,interval);
 
@@ -278,6 +299,8 @@ function render(status) {
                 timer = duration;
                 clearInterval(interval)
             } else {
+
+
                 const pTimerIcon = document.querySelector('.pTimerIcon');
                 display.innerText = timer.toString()+"s";
                 if (!!pTimerIcon) pTimerIcon.style.display = "flex";
