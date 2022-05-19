@@ -42,23 +42,33 @@ try {
             let collectionName = col_slug1.replace("/activity","")
 
             async function fetchAddress(col_slug) {
-                const response = await fetch(`http://localhost:5000/api/collection/${col_slug}/check-address`, {
-                    "method": "GET",
-                    "headers": {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
-                    "mode": "cors",
-                    "credentials": "include",
-                    "withCredentials": "true"
-                }).catch((error) => console.error(error));
-                const result =  await response.json();
-                return result;
+                try {
+                    const response = await fetch(`http://localhost:5000/api/collection/${col_slug}/check-address`, {
+                        "method": "GET",
+                        "headers": {
+                            "Accept": "application/json",
+                            "Content-Type": "application/json"
+                        },
+                        "mode": "cors",
+                        "credentials": "include",
+                        "withCredentials": "true"
+                    })
+
+                    const result =  await response.json();
+                    return result;
+                } catch (e) {
+
+                }
             }
 
             clearInterval(interval);
+
             fetchAddress(collectionName).then((data) => {
-                render(data.status);
+                try {
+                    render(data.status);
+                } catch (e) {
+
+                }
             })
         }
     },10)
