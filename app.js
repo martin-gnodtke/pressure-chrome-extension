@@ -3,13 +3,37 @@ try {
         let collectionStatsBar = document.getElementsByClassName('Blockreact__Block-sc-1xf18x6-0 hfScwI')[1];
         let dropdown = document.getElementsByClassName("pDropdown");
         let statBar = document.querySelector(".pressureStatsBar");
+        let emptyMessage = document.getElementsByClassName("divSolanaMessage pLogIn")[0];
         let timer = document.querySelector(".pTimer");
+
+        const disabledURLs = [
+            "collection/art",
+            "collection/collectibles",
+            "collection/domain-names",
+            "collection/music",
+            "collection/photography-category",
+            "collection/sports",
+            "collection/trading-cards",
+            "collection/utility",
+            "collection/virtual-worlds",
+            "solana-collections"
+        ]
+
+        const isInclude = disabledURLs.some((itemURL) => location.pathname.includes(itemURL))
+
+        if (isInclude) {
+            interval && clearInterval(interval);
+        }
 
         if (!!statBar || !!timer || !!dropdown.length) {
             clearInterval(interval);
-            statBar.remove();
+            statBar && statBar.remove();
             timer.remove();
             removeDuplicates(dropdown);
+        }
+
+        if (isInclude && emptyMessage) {
+            emptyMessage && emptyMessage.remove();
         }
 
         if (!!collectionStatsBar) {
@@ -27,7 +51,7 @@ try {
                     "mode": "cors",
                     "credentials": "include",
                     "withCredentials": "true"
-                }).catch(error => console.log(error));
+                }).catch((error) => console.error(error));
                 const result =  await response.json();
                 return result;
             }
@@ -35,7 +59,7 @@ try {
             clearInterval(interval);
             fetchAddress(collectionName).then((data) => {
                 render(data.status);
-            });
+            })
         }
     },10)
 } catch (e) {
@@ -50,7 +74,6 @@ function render(status) {
     let collectionStatsBar = document.getElementsByClassName('Blockreact__Block-sc-1xf18x6-0 hfScwI')[1];
     let chainData = document.getElementsByClassName("Blockreact__Block-sc-1xf18x6-0 Flexreact__Flex-sc-1twd32i-0 FlexColumnreact__FlexColumn-sc-1wwz3hp-0 VerticalAlignedreact__VerticalAligned-sc-b4hiel-0 CenterAlignedreact__CenterAligned-sc-cjf6mn-0 Avatarreact__AvatarContainer-sc-sbw25j-0 edMTda jYqxGr ksFzlZ iXcsEj cgnEmv dukFGY")[0].parentNode;
     const chainLabel = chainData.getAttribute("aria-label");
-
 
     fetchAccount().then((data) => {
         if(status !== 200 && chainLabel.includes("ETH")) {
@@ -101,11 +124,11 @@ function render(status) {
             "withCredentials": "true",
             signal: signal
         }).catch(error => console.log(error));
-        return await response.json();
+        const result = await response.json();
+        return result;
     }
 
     async function fetchAccount() {
-        let controller = new AbortController();
         const response = await fetch(`http://localhost:5000/api/user/account`, {
             "method": "GET",
             "headers": {
@@ -115,9 +138,9 @@ function render(status) {
             "mode": "cors",
             "credentials": "include",
             "withCredentials": "true",
-            signal: controller.signal
         }).catch(error => console.log(error));
-        return await response.json();
+        const result = await response.json();
+        return result;
     }
 
     let markupTimer = '<div>'+
@@ -261,13 +284,18 @@ function render(status) {
                     document.querySelector(".pDropdownSelect").innerHTML = markupSelect;
                     renderButtonLogIn();
                 } else {
-
-                    startTimer(30, display)
+                    startTimer(30, display);
                 }
-                document.querySelector('.salesValue').firstChild.innerHTML = sales;
-                document.querySelector('.listedValue').firstChild.innerHTML = listings;
-                document.querySelector('.pressureValue').firstChild.style.color = ((pressure < 0) ? '#770b0c' : '#1c9d00');
-                document.querySelector('.pressureValue').firstChild.innerHTML = pressure;
+                const salesItem = document.querySelector('.salesValue').firstChild;
+                const listedItem = document.querySelector('.listedValue').firstChild;
+                const pressuareItem = document.querySelector('.pressureValue');
+
+                if (!!salesItem || !!listedItem || !!pressuareItem) {
+                    salesItem.innerHTML = sales;
+                    listedItem.innerHTML = listings;
+                    pressuareItem.firstChild.style.color = ((pressure < 0) ? '#770b0c' : '#1c9d00');
+                    pressuareItem.firstChild.innerHTML = pressure;
+                }
             })
         }
     }
