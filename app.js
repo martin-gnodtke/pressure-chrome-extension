@@ -1,10 +1,56 @@
+function markupExtension() {
+    let markupTimer = '<div>'+
+        '<div class="pTimerIcon">'+
+        '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="stopwatch" class="svg-inline--fa fa-stopwatch fa-w-14" role="img" viewBox="0 0 448 512"><path fill="currentColor" d="M432 304c0 114.9-93.1 208-208 208S16 418.9 16 304c0-104 76.3-190.2 176-205.5V64h-28c-6.6 0-12-5.4-12-12V12c0-6.6 5.4-12 12-12h120c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12h-28v34.5c37.5 5.8 71.7 21.6 99.7 44.6l27.5-27.5c4.7-4.7 12.3-4.7 17 0l28.3 28.3c4.7 4.7 4.7 12.3 0 17l-29.4 29.4-.6.6C419.7 223.3 432 262.2 432 304zm-176 36V188.5c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12V340c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12z"/></svg>'+
+        '</div>'+
+        '<span id="countdown">'+
+        '-'+
+        '</span>'+
+        '</div>';
+
+    let markupSelect = '<select class="pDropdownSelect">'+
+        '<option value="30" disabled selected>Select Time</option>'+
+        '<option value="1">1 Minute</option>'+
+        '<option value="5">5 Minutes</option>'+
+        '<option value="10">10 Minutes</option>'+
+        '<option value="15">15 Minutes</option>'+
+        '<option value="30">30 Minutes</option>'+
+        '</select>'
+
+    let markupStatusBar = '<div class="pStatsBarItem">'+
+        '<div class="pStatsBarItemInner salesItem">'+
+        '<div>'+
+        '<div class="pStatsBarItemInnerValue salesValue">'+
+        '<span class="pStatsBarItemValue">-</span>'+
+        '</div>'+
+        '<div class="pStatsBarItemText">sales</div>'+
+        '</div>'+
+        '</div>'+
+        '<div class="pStatsBarItemInner listedItem">'+
+        '<div>'+
+        '<div class="pStatsBarItemInnerValue listedValue">'+
+        '<span class="pStatsBarItemValue">-</span>'+
+        '</div>'+
+        '<div class="pStatsBarItemText">listed</div>'+
+        '</div>'+
+        '</div>'+
+        '<div class="pStatsBarItemInner pressureItem">'+
+        '<div>'+
+        '<div class="pStatsBarItemInnerValue pressureValue">'+
+        '<span class="pStatsBarItemValue">-</span>'+
+        '</div>'+
+        '<div class="pStatsBarItemText">pressure</div>'+
+        '</div>'+
+        '</div>'+
+        '</div>';
+
+    return {markupTimer,markupSelect,markupStatusBar}
+}
+
 try {
     const interval = setInterval(() => {
         let collectionStatsBar = document.getElementsByClassName('Blockreact__Block-sc-1xf18x6-0 hfScwI')[1];
-        let dropdown = document.getElementsByClassName("pDropdown");
-        let statBar = document.querySelector(".pressureStatsBar");
         let emptyMessage = document.getElementsByClassName("divSolanaMessage pLogIn")[0];
-        let timer = document.querySelector(".pTimer");
 
         const disabledURLs = [
             "collection/art",
@@ -21,17 +67,6 @@ try {
 
         const isInclude = disabledURLs.some((itemURL) => location.pathname.includes(itemURL))
 
-        if (isInclude) {
-            interval && clearInterval(interval);
-        }
-
-        if (!!statBar || !!timer || !!dropdown.length) {
-            clearInterval(interval);
-            statBar && statBar.remove();
-            timer.remove();
-            removeDuplicates(dropdown);
-        }
-
         if (isInclude && emptyMessage) {
             emptyMessage && emptyMessage.remove();
         }
@@ -39,7 +74,18 @@ try {
         if (!!collectionStatsBar) {
             let collection = new URL(window.location.href);
             let col_slug1 = collection.pathname.replace('/collection/', '');
-            let collectionName = col_slug1.replace("/activity","")
+            let collectionName = col_slug1.replace("/activity","");
+
+            const { markupTimer,markupSelect } = markupExtension();
+            let pTimer = document.createElement('div');
+            pTimer.className = "pTimer";
+            pTimer.innerHTML = markupTimer;
+            collectionStatsBar.parentNode.insertBefore(pTimer, collectionStatsBar.nextSibling);
+
+            let pDropdown = document.createElement('div');
+            pDropdown.className = "pDropdown";
+            pDropdown.innerHTML = markupSelect
+            collectionStatsBar.parentNode.insertBefore(pDropdown, collectionStatsBar.nextSibling);
 
             async function fetchAddress(col_slug) {
                 try {
@@ -77,7 +123,19 @@ try {
 }
 
 function removeDuplicates(htmlCollection) {
-   Array.from(htmlCollection).forEach((domElement) => domElement.parentNode.removeChild(domElement));
+    htmlCollection && Array.from(htmlCollection).forEach((domElement,idx) => idx > 0 && domElement.parentNode.removeChild(domElement));
+}
+
+function clearDuplicates() {
+    let dropdown = document.getElementsByClassName("pDropdown");
+    let statBar = document.getElementsByClassName("pressureStatsBar");
+    let timer = document.getElementsByClassName("pTimer");
+
+    if (!!statBar || !!timer || !!dropdown.length) {
+        removeDuplicates(statBar);
+        removeDuplicates(timer);
+        removeDuplicates(dropdown);
+    }
 }
 
 function render(status) {
@@ -153,73 +211,51 @@ function render(status) {
         return result;
     }
 
-    let markupTimer = '<div>'+
-        '<div class="pTimerIcon">'+
-        '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="stopwatch" class="svg-inline--fa fa-stopwatch fa-w-14" role="img" viewBox="0 0 448 512"><path fill="currentColor" d="M432 304c0 114.9-93.1 208-208 208S16 418.9 16 304c0-104 76.3-190.2 176-205.5V64h-28c-6.6 0-12-5.4-12-12V12c0-6.6 5.4-12 12-12h120c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12h-28v34.5c37.5 5.8 71.7 21.6 99.7 44.6l27.5-27.5c4.7-4.7 12.3-4.7 17 0l28.3 28.3c4.7 4.7 4.7 12.3 0 17l-29.4 29.4-.6.6C419.7 223.3 432 262.2 432 304zm-176 36V188.5c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12V340c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12z"/></svg>'+
-        '</div>'+
-        '<span id="countdown">'+
-        '-'+
-        '</span>'+
-        '</div>';
+    const { markupTimer,markupSelect } = markupExtension();
 
-    let markupSelect = '<select class="pDropdownSelect">'+
-        '<option value="30" disabled selected>Select Time</option>'+
-        '<option value="1">1 Minute</option>'+
-        '<option value="5">5 Minutes</option>'+
-        '<option value="10">10 Minutes</option>'+
-        '<option value="15">15 Minutes</option>'+
-        '<option value="30">30 Minutes</option>'+
-        '</select>'
+
+    // let pTimer = null;
+    // let pDropdown = null;
+    // let dropdown = document.querySelector(".pDropdown");
+    // let timer = document.querySelector(".pTimer");
+
 
     let pTimer = document.createElement('div');
     pTimer.className = "pTimer";
     pTimer.innerHTML = markupTimer;
     collectionStatsBar.parentNode.insertBefore(pTimer, collectionStatsBar.nextSibling);
 
-
     let pDropdown = document.createElement('div');
     pDropdown.className = "pDropdown";
     pDropdown.innerHTML = markupSelect
-
     collectionStatsBar.parentNode.insertBefore(pDropdown, collectionStatsBar.nextSibling);
 
+    // if (!timer) {
+    //
+    // }
+    //
+    //
+    // if (!dropdown) {
+    //     pDropdown = document.createElement('div');
+    //     pDropdown.className = "pDropdown";
+    //     pDropdown.innerHTML = markupSelect
+    //     collectionStatsBar.parentNode.insertBefore(pDropdown, collectionStatsBar.nextSibling);
+    // }
 
     function renderStatusBar() {
-        document.querySelector(".pDropdownSelect").removeAttribute("disabled")
+        document.querySelector(".pDropdownSelect").removeAttribute("disabled");
         let pressureStatsBar = document.createElement('div');
-        pressureStatsBar.className = "pressureStatsBar";
-        pressureStatsBar.innerHTML =
-            '<div class="pStatsBarItem">'+
-            '<div class="pStatsBarItemInner salesItem">'+
-            '<div>'+
-            '<div class="pStatsBarItemInnerValue salesValue">'+
-            '<span class="pStatsBarItemValue">-</span>'+
-            '</div>'+
-            '<div class="pStatsBarItemText">sales</div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="pStatsBarItemInner listedItem">'+
-            '<div>'+
-            '<div class="pStatsBarItemInnerValue listedValue">'+
-            '<span class="pStatsBarItemValue">-</span>'+
-            '</div>'+
-            '<div class="pStatsBarItemText">listed</div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="pStatsBarItemInner pressureItem">'+
-            '<div>'+
-            '<div class="pStatsBarItemInnerValue pressureValue">'+
-            '<span class="pStatsBarItemValue">-</span>'+
-            '</div>'+
-            '<div class="pStatsBarItemText">pressure</div>'+
-            '</div>'+
-            '</div>'+
-            '</div>';
-
-        collectionStatsBar.parentNode.insertBefore(pressureStatsBar, pTimer);
-
+       let statusBar = document.querySelector(".pressureStatsBar");
+        const {markupStatusBar} = markupExtension();
         let display = document.querySelector('#countdown');
         let firstTime = true;
+
+
+
+        pressureStatsBar.className = "pressureStatsBar";
+        pressureStatsBar.innerHTML = markupStatusBar
+        collectionStatsBar.parentNode.insertBefore(pressureStatsBar, pTimer);
+        clearDuplicates();
 
         document.querySelector(".pDropdown").addEventListener("change", function() {
             if(firstTime) {
@@ -231,31 +267,41 @@ function render(status) {
     }
 
     function renderSolanaMessage(nameChain) {
-        let divSolanaMessage = document.createElement("div");
-        divSolanaMessage.className = "divSolanaMessage pLogIn";
-        divSolanaMessage.innerHTML = "<span class='pSolanaMessage'>" + `${nameChain} Collections are currently not supported` + "</span>";
-        collectionStatsBar.parentNode.insertBefore(divSolanaMessage, pTimer);
-        document.querySelector(".pDropdownSelect").setAttribute("disabled","true")
+        let unSupportElement = document.getElementsByClassName("divSolanaMessage pLogIn");
+
+        if (!unSupportElement.length) {
+            let divSolanaMessage = document.createElement("div");
+            divSolanaMessage.className = "divSolanaMessage pLogIn";
+            divSolanaMessage.innerHTML = "<span class='pSolanaMessage'>" + `${nameChain} Collections are currently not supported` + "</span>";
+            collectionStatsBar.parentNode.insertBefore(divSolanaMessage, pTimer);
+            document.querySelector(".pDropdownSelect").setAttribute("disabled","true")
+        }
     }
 
     function renderButtonLogIn() {
-        let pLogInButton = document.createElement("div");
-        pLogInButton.className = "pLogIn";
-        pLogInButton.innerHTML = "<button class='pLogInButton'>" +
-            "<span class='pLogInText'>" +
-            "login to use pressure" +
-            "</span>" +
-            "</button>";
+        let buttonElement = document.querySelector(".pLogIn");
 
-        document.querySelector(".pDropdownSelect").setAttribute("disabled","true")
-        collectionStatsBar.parentNode.insertBefore(pLogInButton, pTimer);
+        if (!buttonElement) {
+            let pLogInButton = document.createElement("div");
+            pLogInButton.className = "pLogIn";
+            pLogInButton.innerHTML = "<button class='pLogInButton'>" +
+                "<span class='pLogInText'>" +
+                "login to use pressure" +
+                "</span>" +
+                "</button>";
 
-        document.querySelector(".pLogIn").addEventListener("click",(event) => {
-            refreshToken().then(() => {
-                document.querySelector(".pLogIn").remove();
-                renderStatusBar()
+            let select = document.querySelector(".pDropdownSelect");
+
+            select.setAttribute("disabled","true");
+            collectionStatsBar.parentNode.insertBefore(pLogInButton, pTimer);
+
+            document.querySelector(".pLogIn").addEventListener("click",(event) => {
+                refreshToken().then(() => {
+                    document.querySelector(".pLogIn").remove();
+                    renderStatusBar()
+                })
             })
-        })
+        }
     }
 
     async function updateData(display) {
@@ -270,10 +316,8 @@ function render(status) {
             queryTime.setMinutes(queryTime.getMinutes() - parseInt(selectedTime.value));
             let collection = new URL(window.location.href);
 
-
             let col_slug1 = collection.pathname.replace('/collection/', '');
-            let collectionName = col_slug1.replace("/activity","")
-
+            let collectionName = col_slug1.replace("/activity","");
 
             Promise.all([
                 fetchInformation(collectionName,selectedTime.value,signal)
@@ -288,6 +332,8 @@ function render(status) {
                 }
                 display.innerText = "refresh..";
 
+                const {markupTimer,markupSelect} = markupExtension();
+
                 if (sales === undefined || listings === undefined) {
                     document.querySelector(".pressureStatsBar").remove();
                     document.querySelector(".pTimer").innerHTML = markupTimer;
@@ -296,6 +342,7 @@ function render(status) {
                 } else {
                     startTimer(30, display);
                 }
+
                 const salesItem = document.querySelector('.salesValue').firstChild;
                 const listedItem = document.querySelector('.listedValue').firstChild;
                 const pressuareItem = document.querySelector('.pressureValue');
@@ -315,12 +362,12 @@ function render(status) {
 
         const interval = setInterval(async function () {
             let minusTimer = --timer;
-
             let lastURL = location.href;
 
             new MutationObserver(() => {
                 const url = location.href;
                 if (url !== lastURL) {
+                    console.log("aaaa");
                     clearInterval(interval);
                 }
             }).observe(document, {subtree:true, childList:true});
@@ -337,7 +384,6 @@ function render(status) {
                 timer = duration;
                 clearInterval(interval)
             } else {
-
 
                 const pTimerIcon = document.querySelector('.pTimerIcon');
                 display.innerText = timer.toString()+"s";
