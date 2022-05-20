@@ -77,6 +77,7 @@ try {
             let collectionName = col_slug1.replace("/activity","");
 
             const { markupTimer,markupSelect } = markupExtension();
+
             let pTimer = document.createElement('div');
             pTimer.className = "pTimer";
             pTimer.innerHTML = markupTimer;
@@ -196,6 +197,22 @@ function render(status) {
         return result;
     }
 
+    async function fetchListings(col_slug, queryTime, signal) {
+        const response = await fetch(`http://localhost:5000/api/collection/${col_slug}/listings/${queryTime}`, {
+            "method": "GET",
+            "headers": {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            "mode": "cors",
+            "credentials": "include",
+            "withCredentials": "true",
+            signal: signal
+        }).catch(error => console.log(error));
+        const result = await response.json();
+        return result;
+    }
+
     async function fetchAccount() {
         const response = await fetch(`http://localhost:5000/api/user/account`, {
             "method": "GET",
@@ -214,12 +231,6 @@ function render(status) {
     const { markupTimer,markupSelect } = markupExtension();
 
 
-    // let pTimer = null;
-    // let pDropdown = null;
-    // let dropdown = document.querySelector(".pDropdown");
-    // let timer = document.querySelector(".pTimer");
-
-
     let pTimer = document.createElement('div');
     pTimer.className = "pTimer";
     pTimer.innerHTML = markupTimer;
@@ -236,8 +247,6 @@ function render(status) {
         const {markupStatusBar} = markupExtension();
         let display = document.querySelector('#countdown');
         let firstTime = true;
-
-
 
         pressureStatsBar.className = "pressureStatsBar";
         pressureStatsBar.innerHTML = markupStatusBar
@@ -307,9 +316,11 @@ function render(status) {
             let collectionName = col_slug1.replace("/activity","");
 
             Promise.all([
-                fetchInformation(collectionName,selectedTime.value,signal)
-            ]).then(([information]) => {
-                const { sales, listings} = information;
+                fetchInformation(collectionName,selectedTime.value,signal),
+                fetchListings(collectionName,selectedTime.value,signal)
+            ]).then(([information,listingsItems]) => {
+                const { sales } = information;
+                const {listings} = listingsItems
 
                 let pressure = (sales-listings);
 
