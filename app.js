@@ -230,22 +230,9 @@ function render(status) {
     pDropdown.innerHTML = markupSelect
     collectionStatsBar.parentNode.insertBefore(pDropdown, collectionStatsBar.nextSibling);
 
-    // if (!timer) {
-    //
-    // }
-    //
-    //
-    // if (!dropdown) {
-    //     pDropdown = document.createElement('div');
-    //     pDropdown.className = "pDropdown";
-    //     pDropdown.innerHTML = markupSelect
-    //     collectionStatsBar.parentNode.insertBefore(pDropdown, collectionStatsBar.nextSibling);
-    // }
-
     function renderStatusBar() {
         document.querySelector(".pDropdownSelect").removeAttribute("disabled");
         let pressureStatsBar = document.createElement('div');
-       let statusBar = document.querySelector(".pressureStatsBar");
         const {markupStatusBar} = markupExtension();
         let display = document.querySelector('#countdown');
         let firstTime = true;
@@ -367,7 +354,6 @@ function render(status) {
             new MutationObserver(() => {
                 const url = location.href;
                 if (url !== lastURL) {
-                    console.log("aaaa");
                     clearInterval(interval);
                 }
             }).observe(document, {subtree:true, childList:true});
