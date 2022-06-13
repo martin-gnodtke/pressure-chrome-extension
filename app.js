@@ -50,7 +50,8 @@
 
     try {
         const interval = setInterval(() => {
-            let collectionStatsBar = document.getElementsByClassName('Blockreact__Block-sc-1xf18x6-0 hfScwI')[1];
+            let collectionStatsBar = document.getElementsByClassName('sc-1xf18x6-0 sc-1twd32i-0 sc-1y1ib3i-2 haVRLx kKpYwv hiTyHL')[0];
+            console.log(collectionStatsBar);
             let emptyMessage = document.getElementsByClassName("divSolanaMessage pLogIn")[0];
             let selectTime = document.querySelector(".pDropdown");
             let timer = document.querySelector(".pTimer");
@@ -176,17 +177,20 @@
     }
 
     function render(status) {
-        let collectionStatsBar = document.getElementsByClassName('Blockreact__Block-sc-1xf18x6-0 hfScwI')[1];
-        let chainData = document.getElementsByClassName("Blockreact__Block-sc-1xf18x6-0 Flexreact__Flex-sc-1twd32i-0 FlexColumnreact__FlexColumn-sc-1wwz3hp-0 VerticalAlignedreact__VerticalAligned-sc-b4hiel-0 CenterAlignedreact__CenterAligned-sc-cjf6mn-0 Avatarreact__AvatarContainer-sc-sbw25j-0 edMTda jYqxGr ksFzlZ iXcsEj cgnEmv dukFGY")[0].parentNode;
-        const chainLabel = chainData.getAttribute("aria-label");
+        let collectionStatsBar = document.getElementsByClassName('sc-1xf18x6-0 sc-1twd32i-0 sc-1y1ib3i-2 haVRLx kKpYwv hiTyHL')[0];
+        console.log(collectionStatsBar);
+        let chainData = document.getElementsByClassName("sc-1pie21o-0 elyzfO Asset--anchor")[0]; // First Item of Grid
+        console.log(chainData);
+        const chainLabel = chainData.getAttribute("href"); // href element includes the chain name
+        console.log(chainLabel);
 
         fetchAccount().then((data) => {
-            if(status !== 200 && chainLabel.includes("ETH")) {
-                renderSolanaMessage("Polygon");
-            } else if (chainLabel.includes("KLAY")) {
-                renderSolanaMessage("KLAY");
-            } else if (chainLabel.includes("SOL")) {
-                renderSolanaMessage("Solana");
+            if(status !== 200 && chainLabel.includes("matic")) {
+                renderChainUnsupportedMessage("Polygon");
+            } else if (chainLabel.includes("klaytn")) {
+                renderChainUnsupportedMessage("KLAY");
+            } else if (chainLabel.includes("solana")) {
+                renderChainUnsupportedMessage("Solana");
             } else if (data.id) {
                 renderStatusBar();
             } else {
@@ -194,9 +198,9 @@
             }
         }).catch(() => {
             if (chainLabel.includes("KLAY")) {
-                renderSolanaMessage("KLEY");
+                renderChainUnsupportedMessage("KLAY");
             } else if (chainLabel.includes("SOL")) {
-                renderSolanaMessage("Solana");
+                renderChainUnsupportedMessage("Solana");
             } else {
                 renderButtonLogIn()
             }
@@ -309,7 +313,7 @@
             clearDuplicates();
         }
 
-        function renderSolanaMessage(nameChain) {
+        function renderChainUnsupportedMessage(nameChain) {
             let unSupportElement = document.getElementsByClassName("divSolanaMessage pLogIn");
 
             if (!unSupportElement.length) {
@@ -342,7 +346,7 @@
                     document.querySelector(".pLogIn").addEventListener("click",(event) => {
                         refreshToken().then(() => {
                             document.querySelector(".pLogIn").remove();
-                            renderStatusBar()
+                            renderStatusBar();
                         })
                     })
                 }
@@ -397,13 +401,13 @@
 
                     const salesItem = document.querySelector('.salesValue').firstChild;
                     const listedItem = document.querySelector('.listedValue').firstChild;
-                    const pressuareItem = document.querySelector('.pressureValue');
+                    const pressureItem = document.querySelector('.pressureValue');
 
-                    if (!!salesItem || !!listedItem || !!pressuareItem) {
+                    if (!!salesItem || !!listedItem || !!pressureItem) {
                         salesItem.innerHTML = sales;
                         listedItem.innerHTML = listings;
-                        pressuareItem.firstChild.style.color = ((pressure < 0) ? '#770b0c' : '#1c9d00');
-                        pressuareItem.firstChild.innerHTML = pressure;
+                        pressureItem.firstChild.style.color = ((pressure < 0) ? '#770b0c' : '#1c9d00');
+                        pressureItem.firstChild.innerHTML = pressure;
                     }
                 })
             }
@@ -444,3 +448,6 @@
         }
     }
 
+    function addExtension() {
+        const { markupTimer,markupSelect,markupStatusBar } = markupExtension();
+    }
