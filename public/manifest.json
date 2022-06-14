@@ -1,25 +1,59 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
-  "icons": [
+  "name": "Pressure",
+  "description": "Pressure Chrome Extension by TheBrettWay and Kingsnetic",
+  "version": "0.0.1",
+  "manifest_version": 3,
+  "content_scripts": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "matches": [
+        "https://opensea.io/collection/*"
+      ],
+      "js": [
+        "./static/js/content_script.js"
+      ],
+      "css": [
+        "/css/style.css"
+      ],
+      "run_at": "document_end",
+      "all_frames": true
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "/css/style.css",
+        "/images/*"
+      ],
+      "matches": [
+        "https://opensea.io/*"
+      ]
+    }
+  ],
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "/images/logo_16x16.png",
+      "32": "/images/logo_32x32.png"
+    }
+  },
+  "icons": {
+    "16": "/images/logo_16x16.png",
+    "32": "/images/logo_32x32.png",
+    "48": "/images/logo_48x48.png",
+    "128": "/images/logo_128x128.png"
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "./static/js/background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "webRequest",
+    "storage",
+    "cookies",
+    "tabs",
+    "scripting"
+  ]
 }
