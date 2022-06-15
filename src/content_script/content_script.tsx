@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { OPEN_SEA_CHAIN_LOGO, OPEN_SEA_COLLECTION_STATS_BAR } from "./query_selectors";
 import * as PressureAPI from './pressure_api';
 import { User } from "../model/User";
+import PressureBar from "./components/PressureBar";
 
 const osCollectionStatsBar = document.querySelector(OPEN_SEA_COLLECTION_STATS_BAR);
 
@@ -21,8 +22,9 @@ const ContentScript = () => {
     }, []);
 
     async function fetchUser() {
-        const user = await PressureAPI.fetchUser();
-        setUser(user);
+        // const user = await PressureAPI.fetchUser();
+        // setUser(user);
+        setUser({ id: "test-user" })
     }
 
     return (
@@ -30,7 +32,7 @@ const ContentScript = () => {
             {chainSupported
                 ? <>
                     {user
-                        ? <div>Logged in</div>
+                        ? <PressureBar />
                         : <div>Not logged in</div>}
                 </>
                 : <div>Chain not supported</div>

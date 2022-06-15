@@ -57,11 +57,11 @@
     font-size: 14px;
 }
 
-#pDropdown {
+#p-dropdown-select-time {
     margin-top: 16px;
 }
 
-#pDropdown select {
+#p-dropdown-select-time select {
     width: 144px;
     padding: 6px;
     color:rgb(255, 255, 255);
@@ -73,11 +73,11 @@
     border-bottom: none;
 }
 
-#pDropdown select:focus {
+#p-dropdown-select-time select:focus {
     outline: none;
 }
 
-#pTimer {
+#p-timer {
     width: 144px;
     padding: 6px;
     color:rgb(255, 255, 255);
@@ -88,12 +88,12 @@
     border-top: none;
 }
 
-#pTimer div {
+#p-timer div {
     display: flex;
     justify-content: center;
 }
 
-#pTimer .pTimerIcon {
+#p-timer .timer-icon {
     width: 13px;
     margin-right: 9px;
 }
