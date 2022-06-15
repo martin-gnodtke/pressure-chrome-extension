@@ -12,7 +12,7 @@
         "./static/js/content_script.js"
       ],
       "css": [
-        "/css/style.css"
+        "/css/content.css"
       ],
       "run_at": "document_end",
       "all_frames": true
@@ -21,7 +21,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "/css/style.css",
+        "/css/content.css",
         "/images/*"
       ],
       "matches": [

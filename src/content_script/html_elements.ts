@@ -15,7 +15,7 @@ export const pTimer =
 export const pDropdown =
     `
     <div id="pDropdown">
-        <select>
+        <select id="pDropdownSelect">
             <option value="30" disabled selected>Select Time</option>
             <option value="1">1 Minute</option>
             <option value="5">5 Minutes</option>
@@ -54,4 +54,9 @@ export const pStatsBar =
             </div>
         </div>
     </div>
+    `;
+
+export const chainUnsupportedMessage =
     `
+    <span class='pSolanaMessage'>This chain is currently not supported</span>
+    `;
