@@ -9,10 +9,10 @@
         "https://opensea.io/collection/*"
       ],
       "js": [
-        "./static/js/content_script.js"
+        "./static/js/PressureApp.js"
       ],
       "css": [
-        "/css/content_script.css"
+        "/css/PressureApp.css"
       ],
       "run_at": "document_end",
       "all_frames": true
@@ -21,7 +21,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "/css/content_script.css",
+        "/css/PressureApp.css",
         "/images/*"
       ],
       "matches": [

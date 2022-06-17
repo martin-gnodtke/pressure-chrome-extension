@@ -1,4 +1,4 @@
-.pressureStatsBar {
+#p-statsbar {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -6,11 +6,7 @@
     border: 1px solid rgb(21, 27, 34);
 }
 
-#pStatsBar {
-    display: flex;
-}
-
-.pStatsBarItemInner {
+.p-statsbar-item {
     display: flex;
     width: 144px;
     height: 88px;
@@ -25,34 +21,18 @@
     color: rgb(229, 232, 235);
 }
 
-.pStatsBarItemInner:nth-child(2){
+.p-statsbar-item:nth-child(2) {
     border-left: 1px solid rgb(21, 27, 34);
     border-right: 1px solid rgb(21, 27, 34);
 }
 
-.pStatsBarItemInnerValue {
-    display: flex;
-    -webkit-box-align: center;
-    align-items: center;
-    font-size: 12px;
-    font-weight: 500;
-    height: 20px;
-    -webkit-box-pack: center;
-    justify-content: center;
-    width: 100%;
-}
-
-.pStatsBarItemValue {
+.p-statsbar-item-value {
     font-weight: 600;
     font-size: 24px;
     color: rgb(255, 255, 255);
 }
 
-.red {
-    color: #770b0c;
-}
-
-.pStatsBarItemText {
+.p-statsbar-item-text {
     margin-top: 8px;
     font-size: 14px;
 }
@@ -64,7 +44,7 @@
 #p-dropdown-select-time select {
     width: 144px;
     padding: 6px;
-    color:rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
     background-color: rgb(32, 34, 37);
     cursor: pointer;
     border: 1px solid rgb(21, 27, 34);
@@ -78,9 +58,11 @@
 }
 
 #p-timer {
+    display: flex;
+    justify-content: center;
     width: 144px;
     padding: 6px;
-    color:rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
     background-color: rgb(32, 34, 37);
     border: 1px solid rgb(21, 27, 34);
     border-bottom-left-radius: 10px;
@@ -88,12 +70,7 @@
     border-top: none;
 }
 
-#p-timer div {
-    display: flex;
-    justify-content: center;
-}
-
-#p-timer .timer-icon {
+#timer-icon {
     width: 13px;
     margin-right: 9px;
 }
