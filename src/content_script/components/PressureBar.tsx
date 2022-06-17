@@ -1,45 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as PressureAPI from '../pressure_api';
 
 const PressureBar = () => {
-    const TIMER_DURATION_IN_SECONDS = 30;
+    const TIMER_DURATION_IN_SECONDS = process.env.REACT_APP_NODE_ENV === 'production' ? 30 : 8;
 
     const [sales, setSales] = useState<number | null>(null);
     const [listings, setListings] = useState<number | null>(null);
 
     const pressure = (sales !== null && listings !== null) ? sales - listings : null
 
-    const [selectedQueryTime, setSelectedQueryTime] = useState<string | null>(null);
-    const [timerIsRunning, setTimerIsRunning] = useState(false);
+    const queryTimerSelectRef = useRef<HTMLSelectElement>(null!);
+
+    const [timerRunning, setTimerRunning] = useState(false);
     const [timeLeftInSeconds, setTimeLeftInSeconds] = useState(0);
 
-    useEffect(() => {
-        if (selectedQueryTime && !timerIsRunning) {
-            startTimer(TIMER_DURATION_IN_SECONDS);
-        }
-
-        function startTimer(countdownTimeInSeconds: number) {
-            updateSalesAndListings();
-            let countdownTimeLeft = countdownTimeInSeconds;
-            setTimerIsRunning(true);
-
-            function nextTick() {
-                setTimeLeftInSeconds(countdownTimeLeft)
-
-                if (countdownTimeLeft < 1) {
-                    startTimer(TIMER_DURATION_IN_SECONDS);
-                    return;
-                }
-
-                setTimeout(() => {
-                    countdownTimeLeft--;
-                    nextTick();
-                }, 1000);
-            }
-            nextTick();
-        }
-
+    function startUpdateTimer() {
         async function updateSalesAndListings() {
+            const selectedQueryTime = queryTimerSelectRef.current.value;
             const collectionSlug = window.location.href.split('?')[0].split("#")[0].split('/').slice(-1)[0];
             console.log("updateSalesAndListings with selectedQueryTime: " + selectedQueryTime);
 
@@ -50,12 +27,37 @@ const PressureBar = () => {
             setSales(sales);
             setListings(listings);
         }
-    }, [selectedQueryTime, timerIsRunning]);
+
+        updateSalesAndListings();
+        let countdownTimeLeft = TIMER_DURATION_IN_SECONDS;
+        setTimerRunning(true);
+
+        function nextTick() {
+            setTimeLeftInSeconds(countdownTimeLeft)
+
+            if (countdownTimeLeft < 1) {
+                startUpdateTimer();
+                return;
+            }
+
+            setTimeout(() => {
+                countdownTimeLeft--;
+                nextTick();
+            }, 1000);
+        }
+        nextTick();
+    }
+
+    function onQueryTimeSelected() {
+        if (!timerRunning) {
+            startUpdateTimer();
+        }
+    }
 
     return (
         <div id="p-dropdown-select-time">
-            <select value={selectedQueryTime || undefined} onChange={(event) => setSelectedQueryTime(event.target.value.toString())}>
-                <option value={undefined}>Select time</option>
+            <select ref={queryTimerSelectRef} onChange={onQueryTimeSelected}>
+                <option value={undefined} disabled={timerRunning}>Select time</option>
                 <option value="1">1 Minute</option>
                 <option value="5">5 Minutes</option>
                 <option value="10">10 Minutes</option>
