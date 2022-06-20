@@ -77,7 +77,7 @@ const PressureBar = () => {
                     <div className="p-statsbar-item-text">listed</div>
                 </div>
                 <div className="p-statsbar-item">
-                    <span className="p-statsbar-item-value">{pressure ?? '-'}</span>
+                    <span className={"p-statsbar-item-value " + ((pressure !== null || pressure !== 'undefined') ? '' : (pressure < 0) ? 'p-negative' : 'p-positive') }>{pressure ?? '-'}</span>
                     <div className="p-statsbar-item-text">pressure</div>
                 </div>
             </div>
