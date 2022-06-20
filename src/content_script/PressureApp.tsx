@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { OPEN_SEA_CHAIN_LOGO, OPEN_SEA_COLLECTION_STATS_BAR } from "./query_selectors";
-import * as PressureAPI from './pressure_api';
+import * as PressureAPI from '../network/pressure_api';
 import { User } from "../model/User";
 import PressureBar from "./components/PressureBar";
 

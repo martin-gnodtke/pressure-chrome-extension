@@ -37,11 +37,11 @@
     font-size: 14px;
 }
 
-#p-dropdown-select-time {
+#p-dropdown-select-lookback-time {
     margin-top: 16px;
 }
 
-#p-dropdown-select-time select {
+#p-dropdown-select-lookback-time select {
     width: 144px;
     padding: 6px;
     color: rgb(255, 255, 255);
@@ -53,7 +53,7 @@
     border-bottom: none;
 }
 
-#p-dropdown-select-time select:focus {
+#p-dropdown-select-lookback-time select:focus {
     outline: none;
 }
 

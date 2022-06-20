@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-import * as PressureAPI from '../pressure_api';
+import { useRef, useState } from "react";
 
 const PressureBar = () => {
     const TIMER_DURATION_IN_SECONDS = process.env.REACT_APP_NODE_ENV === 'production' ? 30 : 8;
@@ -9,21 +8,24 @@ const PressureBar = () => {
 
     const pressure = (sales !== null && listings !== null) ? sales - listings : null
 
-    const queryTimerSelectRef = useRef<HTMLSelectElement>(null!);
+    const lookBackTimeSelectRef = useRef<HTMLSelectElement>(null!);
 
     const [timerRunning, setTimerRunning] = useState(false);
     const [timeLeftInSeconds, setTimeLeftInSeconds] = useState(0);
 
     function startUpdateTimer() {
         async function updateSalesAndListings() {
-            const selectedQueryTime = queryTimerSelectRef.current.value;
+            const selectedLookBackTime = lookBackTimeSelectRef.current.value;
             const collectionSlug = window.location.href.split('?')[0].split("#")[0].split('/').slice(-1)[0];
-            console.log("updateSalesAndListings with selectedQueryTime: " + selectedQueryTime);
 
-            const [sales, listings] = await Promise.all([
-                PressureAPI.fetchCollectionSales(collectionSlug, selectedQueryTime!),
-                PressureAPI.fetchCollectionListings(collectionSlug, selectedQueryTime!)
-            ]);
+            const [sales, listings] = await chrome.runtime.sendMessage({
+                action: 'fetch_collection_sales_and_listings',
+                payload: {
+                    collectionSlug: collectionSlug,
+                    lookBackTime: selectedLookBackTime,
+                }
+            })
+
             setSales(sales);
             setListings(listings);
         }
@@ -55,8 +57,8 @@ const PressureBar = () => {
     }
 
     return (
-        <div id="p-dropdown-select-time">
-            <select ref={queryTimerSelectRef} onChange={onQueryTimeSelected}>
+        <div id="p-dropdown-select-lookback-time">
+            <select ref={lookBackTimeSelectRef} onChange={onQueryTimeSelected}>
                 <option value={undefined} disabled={timerRunning}>Select time</option>
                 <option value="1">1 Minute</option>
                 <option value="5">5 Minutes</option>

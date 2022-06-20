@@ -1,7 +1,7 @@
 import { fetchWithTimeout } from "../util/network_utils";
 
 export async function fetchLoggedInUser() {
-    const response = await fetchWithTimeout('http://localhost:5000/api/user/account', {
+    const response = await fetchWithTimeout('http://localhost:5000/user/account', {
         "mode": "cors",
         "credentials": "include",
     });
@@ -12,8 +12,8 @@ export async function fetchLoggedInUser() {
     }
 }
 
-export async function fetchCollectionSales(collectionSlug: string, queryTime: string) {
-    const response = await fetchWithTimeout(`http://localhost:5000/api/collection/${collectionSlug}/sales/${queryTime}`, {
+export async function fetchCollectionSales(collectionSlug: string, lookBackTime: string) {
+    const response = await fetchWithTimeout(`http://localhost:5000/collection/${collectionSlug}/sales/${lookBackTime}`, {
         "mode": "cors",
         "credentials": "include",
     });
@@ -24,8 +24,8 @@ export async function fetchCollectionSales(collectionSlug: string, queryTime: st
     }
 }
 
-export async function fetchCollectionListings(collectionSlug: string, queryTime: string) {
-    const response = await fetchWithTimeout(`http://localhost:5000/api/collection/${collectionSlug}/listings/${queryTime}`, {
+export async function fetchCollectionListings(collectionSlug: string, lookBackTime: string) {
+    const response = await fetchWithTimeout(`http://localhost:5000/collection/${collectionSlug}/listings/${lookBackTime}`, {
         "mode": "cors",
         "credentials": "include",
     });
