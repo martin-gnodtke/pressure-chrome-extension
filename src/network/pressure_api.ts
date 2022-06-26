@@ -1,37 +1,16 @@
 import { fetchWithTimeout } from "../util/network_utils";
 
 export async function fetchLoggedInUser() {
-    const response = await fetchWithTimeout('http://localhost:5000/user/account', {
-        "mode": "cors",
-        "credentials": "include",
-    });
-    if (response.ok) {
-        return await response.json();
-    } else {
-        return null; //TODO: Distinguish 401 from actual errors (show error message)
-    }
+    const response = await fetchWithTimeout(process.env.REACT_APP_SERVER_URL + '/user/account');
+    return await response.json();
 }
 
 export async function fetchCollectionSales(collectionSlug: string, lookBackTime: string) {
-    const response = await fetchWithTimeout(`http://localhost:5000/collection/${collectionSlug}/sales/${lookBackTime}`, {
-        "mode": "cors",
-        "credentials": "include",
-    });
-    if (response.ok) {
-        return await response.json();
-    } else {
-        return null; //TODO: Distinguish 401 from actual errors (show error message)
-    }
+    const response = await fetchWithTimeout(process.env.REACT_APP_SERVER_URL + `/collection/${collectionSlug}/sales/${lookBackTime}`);
+    return await response.json();
 }
 
 export async function fetchCollectionListings(collectionSlug: string, lookBackTime: string) {
-    const response = await fetchWithTimeout(`http://localhost:5000/collection/${collectionSlug}/listings/${lookBackTime}`, {
-        "mode": "cors",
-        "credentials": "include",
-    });
-    if (response.ok) {
-        return await response.json();
-    } else {
-        return null; //TODO: Distinguish 401 from actual errors (show error message)
-    }
+    const response = await fetchWithTimeout(process.env.REACT_APP_SERVER_URL + `/collection/${collectionSlug}/listings/${lookBackTime}`);
+    return await response.json();
 }

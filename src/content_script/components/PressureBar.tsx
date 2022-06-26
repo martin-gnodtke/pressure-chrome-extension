@@ -6,7 +6,9 @@ const PressureBar = () => {
     const [sales, setSales] = useState<number | null>(null);
     const [listings, setListings] = useState<number | null>(null);
 
-    const pressure = (sales !== null && listings !== null) ? sales - listings : null
+    const [loadingError, setLoadingError] = useState(false);
+
+    const pressure = (sales !== null && listings !== null) ? ((sales - listings) || 0) : null
 
     const lookBackTimeSelectRef = useRef<HTMLSelectElement>(null!);
 
@@ -16,9 +18,9 @@ const PressureBar = () => {
     function startUpdateTimer() {
         async function updateSalesAndListings() {
             const selectedLookBackTime = lookBackTimeSelectRef.current.value;
-            const collectionSlug = window.location.href.split('?')[0].split("#")[0].split('/').slice(-1)[0];
+            const collectionSlug = window.location.href.split('?')[0].split('#')[0].split('/')[4];
 
-            const [sales, listings] = await chrome.runtime.sendMessage({
+            const result = await chrome.runtime.sendMessage({
                 action: 'fetch_collection_sales_and_listings',
                 payload: {
                     collectionSlug: collectionSlug,
@@ -26,8 +28,12 @@ const PressureBar = () => {
                 }
             })
 
-            setSales(sales);
-            setListings(listings);
+            if (result.error) {
+                setLoadingError(true);
+            } else {
+                setSales(result.sales);
+                setListings(result.listings);
+            }
         }
 
         updateSalesAndListings();
@@ -56,6 +62,8 @@ const PressureBar = () => {
         }
     }
 
+    if (loadingError) return <div>Could not load data. Please refresh the page.</div>
+
     return (
         <div id="p-dropdown-select-lookback-time">
             <select ref={lookBackTimeSelectRef} onChange={onQueryTimeSelected}>
@@ -69,11 +77,11 @@ const PressureBar = () => {
 
             <div id="p-statsbar">
                 <div className="p-statsbar-item">
-                    <span className="p-statsbar-item-value">{sales ?? '-'}</span>
+                    <span className="p-statsbar-item-value">{sales ?? '0'}</span>
                     <div className="p-statsbar-item-text">sales</div>
                 </div>
                 <div className="p-statsbar-item">
-                    <span className="p-statsbar-item-value">{listings ?? '-'}</span>
+                    <span className="p-statsbar-item-value">{listings ?? '0'}</span>
                     <div className="p-statsbar-item-text">listed</div>
                 </div>
                 <div className="p-statsbar-item">
