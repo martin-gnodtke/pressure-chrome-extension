@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { OPEN_SEA_CHAIN_LOGO, OPEN_SEA_COLLECTION_STATS_BAR } from "./query_selectors";
 import { User } from "../model/User";
 import PressureBar from "./components/PressureBar";
+import PressurePlaceholder from "./components/PressurePlaceholder";
 
 const openSeaCollectionStatsBar = document.querySelector(OPEN_SEA_COLLECTION_STATS_BAR);
 
@@ -38,26 +39,31 @@ const ContentScript = () => {
         setUserLoading(false);
     }
 
-    function openPressureLogin() {
+    function openPressureLoginPage() {
         chrome.runtime.sendMessage({ action: 'open_login_page' });
     }
 
+    function openBuyPremiumPage() {
+        chrome.runtime.sendMessage({ action: 'open_buy_premium_page' });
+    }
+
     chrome.runtime.onMessage.addListener((message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
-        if (message.action === 'logged_out') {
+        if (message.action === 'clear_user') {
             setUser(null);
             return;
         }
 
-        if (message.action === 'logged_in') {
+        if (message.action === 'reload_user') {
             fetchUser();
             return;
         }
     });
 
-    if (!chainSupported) return <div>Chain not supported.</div>;
-    if (userLoading) return <div>Loading user...</div>;
-    if (userLoadingError) return <div>Could not load user. Please refresh the page.</div>;
-    if (!user) return <button id="p-login-button" onClick={openPressureLogin}>Login with Pressure</button>;
+    if (!chainSupported) return <PressurePlaceholder><strong>Chain not supported.</strong></PressurePlaceholder>;
+    if (userLoading) return <PressurePlaceholder><div>Loading user...</div></PressurePlaceholder>;
+    if (userLoadingError) return <PressurePlaceholder><div>Could not load user. Please refresh the page.</div></PressurePlaceholder>;
+    if (!user) return <PressurePlaceholder><button id="p-auth-button" onClick={openPressureLoginPage}>Login to Pressure</button></PressurePlaceholder>;
+    if (!user.isPremium) return <PressurePlaceholder><button id="p-auth-button" onClick={openBuyPremiumPage}>Please buy Premium</button></PressurePlaceholder>;
     return <PressureBar />;
 }
 

@@ -2,7 +2,7 @@ import { UnauthorizedError } from '../errors/HttpErrors';
 import * as PressureApi from '../network/pressure_api';
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.status === "complete" && tab?.url?.includes("/collection/")) {
+    if (changeInfo.status === "complete" && tab?.url?.includes("opensea.io/collection/")) {
         chrome.scripting.executeScript({ files: ["./static/js/PressureApp.js"], target: { tabId: tabId } })
     }
 });
@@ -41,16 +41,21 @@ chrome.runtime.onMessage.addListener((message: any, sender: chrome.runtime.Messa
         chrome.tabs.create({ 'url': process.env.REACT_APP_WEBSITE_URL });
         return;
     }
+
+    if (message.action === 'open_buy_premium_page') {
+        chrome.tabs.create({ 'url': process.env.REACT_APP_WEBSITE_URL });
+        return;
+    }
 });
 
 chrome.runtime.onMessageExternal.addListener((message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
-    if (message.action === 'logged_out') {
-        sendMessageToAllTabs({ action: 'logged_out' })
+    if (message.action === 'clear_user') {
+        sendMessageToAllTabs({ action: 'clear_user' })
         return;
     }
 
-    if (message.action === 'logged_in') {
-        sendMessageToAllTabs({ action: 'logged_in' })
+    if (message.action === 'reload_user') {
+        sendMessageToAllTabs({ action: 'reload_user' })
         return;
     }
 });
