@@ -1,11 +1,15 @@
 import { UnauthorizedError } from '../errors/HttpErrors';
 import * as PressureApi from '../network/pressure_api';
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.status === "complete" && tab?.url?.includes("opensea.io/collection/")) {
-        chrome.scripting.executeScript({ files: ["./static/js/PressureApp.js"], target: { tabId: tabId } })
-    }
-});
+// chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+//     console.log('changeinfo: ' + JSON.stringify(changeInfo));
+    
+//     if (changeInfo.status === "complete" && tab?.url?.includes("opensea.io/collection/")) {
+//         console.log("injecting script");
+        
+//         chrome.scripting.executeScript({ files: ["./static/js/PressureApp.js"], target: { tabId: tabId } })
+//     }
+// });
 
 chrome.runtime.onMessage.addListener((message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
     if (message.action === 'fetch_logged_in_user') {

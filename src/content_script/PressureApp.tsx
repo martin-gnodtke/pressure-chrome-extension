@@ -5,8 +5,6 @@ import { User } from "../model/User";
 import PressureBar from "./components/PressureBar";
 import PressurePlaceholder from "./components/PressurePlaceholder";
 
-const openSeaCollectionStatsBar = document.querySelector(OPEN_SEA_COLLECTION_STATS_BAR);
-
 const ContentScript = () => {
     const [chainSupported, setChainSupported] = useState(true);
 
@@ -59,15 +57,42 @@ const ContentScript = () => {
         }
     });
 
-    if (!chainSupported) return <PressurePlaceholder><strong>Chain not supported.</strong></PressurePlaceholder>;
-    if (userLoading) return <PressurePlaceholder><div>Loading user...</div></PressurePlaceholder>;
-    if (userLoadingError) return <PressurePlaceholder><div>Could not load user. Please refresh the page.</div></PressurePlaceholder>;
-    if (!user) return <PressurePlaceholder><button id="p-auth-button" onClick={openPressureLoginPage}>Login to Pressure</button></PressurePlaceholder>;
-    if (!user.isPremium) return <PressurePlaceholder><button id="p-auth-button" onClick={openBuyPremiumPage}>Please buy Premium</button></PressurePlaceholder>;
-    return <PressureBar />;
+    //TODO: CLean this up and make the MutationObserver more efficient
+
+    let content: JSX.Element;
+    if (!chainSupported)
+        content = <PressurePlaceholder><strong>Chain not supported.</strong></PressurePlaceholder>;
+    else if (userLoading)
+        content = <PressurePlaceholder><div>Loading user...</div></PressurePlaceholder>;
+    else if (userLoadingError)
+        content = <PressurePlaceholder><div>Could not load user. Please refresh the page.</div></PressurePlaceholder>;
+    else if (!user)
+        content = <PressurePlaceholder><button id="p-auth-button" onClick={openPressureLoginPage}>Login to Pressure</button></PressurePlaceholder>;
+    else if (!user.isPremium)
+        content = <PressurePlaceholder><button id="p-auth-button" onClick={openBuyPremiumPage}>Please buy Premium</button></PressurePlaceholder>;
+    else
+        content = <PressureBar />;
+
+    return (
+        <div id='pressure-app'>
+            {content}
+        </div>
+    )
 }
 
 const pressureApp = document.createElement('div');
 pressureApp.id = 'pressure-extension-root';
-openSeaCollectionStatsBar?.insertAdjacentElement('afterend', pressureApp);
 ReactDOM.render(<ContentScript />, pressureApp)
+
+const injectPressureAppMutationObserver = new MutationObserver((mutationList, observe) => {
+    console.log("mutationList: " + JSON.stringify(mutationList));
+
+    if (RegExp("[^ ]*opensea.io/collection/[^ ]*").test(window.location.href)) {
+        if (!document.querySelector('#pressure-app')) {
+            document.querySelector(OPEN_SEA_COLLECTION_STATS_BAR)?.insertAdjacentElement('afterend', pressureApp);
+        }
+    }
+}
+);
+
+injectPressureAppMutationObserver.observe(document, { childList: true, subtree: true });

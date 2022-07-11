@@ -8,6 +8,9 @@
       "matches": [
         "https://opensea.io/collection/*"
       ],
+      "js": [
+        "./static/js/PressureApp.js"
+      ],
       "css": [
         "/css/PressureApp.css"
       ],
