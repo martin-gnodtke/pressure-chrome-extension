@@ -28,7 +28,10 @@ chrome.runtime.onMessage.addListener((message: any, sender: chrome.runtime.Messa
     if (message.action === 'fetch_collection_sales_and_listings') {
         fetchCollectionListingsAndSales(message.payload.collectionSlug, message.payload.lookBackTime)
             .then(result => {
-                sendResponse({ salesAndListings: result });
+                sendResponse({
+                    sales: result[0],
+                    listings: result[1]
+                });
             })
             .catch(error => {
                 console.log('fetchCollectionListingsAndSales failed with error: ' + error);
