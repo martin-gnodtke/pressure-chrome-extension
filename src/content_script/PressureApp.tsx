@@ -5,6 +5,18 @@ import { User } from "../model/User";
 import PressureBar from "./components/PressureBar";
 import PressurePlaceholder from "./components/PressurePlaceholder";
 
+const injectPressureAppMutationObserver = new MutationObserver((mutationList, observer) => {
+    if (window.location.href.includes('opensea.io/collection/') && !document.querySelector('#pressure-app')) {
+        const pressureApp = document.createElement('div');
+        pressureApp.id = 'pressure-extension-root';
+        ReactDOM.render(<ContentScript />, pressureApp)
+        document.querySelector(OPEN_SEA_COLLECTION_STATS_BAR)?.insertAdjacentElement('afterend', pressureApp);
+    }
+}
+);
+
+injectPressureAppMutationObserver.observe(document, { childList: true, subtree: true });
+
 const ContentScript = () => {
     const [chainSupported, setChainSupported] = useState(true);
 
@@ -57,8 +69,6 @@ const ContentScript = () => {
         }
     });
 
-    //TODO: CLean this up and make the MutationObserver more efficient
-
     let content: JSX.Element;
     if (!chainSupported)
         content = <PressurePlaceholder><strong>Chain not supported.</strong></PressurePlaceholder>;
@@ -79,20 +89,3 @@ const ContentScript = () => {
         </div>
     )
 }
-
-const pressureApp = document.createElement('div');
-pressureApp.id = 'pressure-extension-root';
-ReactDOM.render(<ContentScript />, pressureApp)
-
-const injectPressureAppMutationObserver = new MutationObserver((mutationList, observe) => {
-    console.log("mutationList: " + JSON.stringify(mutationList));
-
-    if (RegExp("[^ ]*opensea.io/collection/[^ ]*").test(window.location.href)) {
-        if (!document.querySelector('#pressure-app')) {
-            document.querySelector(OPEN_SEA_COLLECTION_STATS_BAR)?.insertAdjacentElement('afterend', pressureApp);
-        }
-    }
-}
-);
-
-injectPressureAppMutationObserver.observe(document, { childList: true, subtree: true });
