@@ -5,7 +5,7 @@ import { User } from "../model/User";
 import PressureBar from "./components/PressureBar";
 import PressurePlaceholder from "./components/PressurePlaceholder";
 
-const injectPressureAppMutationObserver = new MutationObserver((mutationList, observer) => {
+const injectPressureAppMutationObserver = new MutationObserver(() => {
     if (window.location.href.includes('opensea.io/collection/') && !document.querySelector('#pressure-app')) {
         const pressureApp = document.createElement('div');
         pressureApp.id = 'pressure-extension-root';

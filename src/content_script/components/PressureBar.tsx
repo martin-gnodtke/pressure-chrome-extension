@@ -1,5 +1,12 @@
 import { useRef, useState } from "react";
 
+let timer: NodeJS.Timer;
+let collectionSlug: string;
+
+function getCurrentCollectionSlug() {
+    return window.location.href.split('?')[0].split('#')[0].split('/')[4];
+}
+
 const PressureBar = () => {
     const TIMER_DURATION_IN_SECONDS = process.env.REACT_APP_NODE_ENV === 'production' ? 30 : 8;
 
@@ -16,9 +23,10 @@ const PressureBar = () => {
     const [timeLeftInSeconds, setTimeLeftInSeconds] = useState(0);
 
     function startUpdateTimer() {
+        collectionSlug = getCurrentCollectionSlug();
+
         async function updateSalesAndListings() {
             const selectedLookBackTime = lookBackTimeSelectRef.current.value;
-            const collectionSlug = window.location.href.split('?')[0].split('#')[0].split('/')[4];
 
             const result = await chrome.runtime.sendMessage({
                 action: 'fetch_collection_sales_and_listings',
@@ -31,6 +39,7 @@ const PressureBar = () => {
             if (result.error) {
                 setLoadingError(true);
             } else {
+                console.log('result: ' + JSON.stringify(result));
                 setSales(result.sales);
                 setListings(result.listings);
             }
@@ -40,20 +49,20 @@ const PressureBar = () => {
         let countdownTimeLeft = TIMER_DURATION_IN_SECONDS;
         setTimerRunning(true);
 
-        function nextTick() {
-            setTimeLeftInSeconds(countdownTimeLeft)
-
-            if (countdownTimeLeft < 1) {
-                startUpdateTimer();
+        timer = setInterval(() => {
+            if (collectionSlug !== getCurrentCollectionSlug() && timer) {
+                console.log('collection slug has changed, clearing timer');
+                clearInterval(timer);
                 return;
             }
 
-            setTimeout(() => {
-                countdownTimeLeft--;
-                nextTick();
-            }, 1000);
-        }
-        nextTick();
+            setTimeLeftInSeconds(countdownTimeLeft--);
+
+            if (countdownTimeLeft <= 0) {
+                updateSalesAndListings();
+                countdownTimeLeft = TIMER_DURATION_IN_SECONDS;
+            }
+        }, 1000);
     }
 
     function onQueryTimeSelected() {
